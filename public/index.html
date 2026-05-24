@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bajaj Finserv Health Qualifier 1 Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="container">
+        <header>
+            <div class="logo">BAJAJ FINSERV HEALTH</div>
+            <span class="badge">Qualifier 1 - Python Challenge</span>
+        </header>
+
+        <main>
+            <!-- Details Card -->
+            <section class="card profile-card">
+                <div class="card-header">
+                    <h2>Candidate Profile</h2>
+                    <span class="dot active"></span>
+                </div>
+                <div class="profile-details">
+                    <div class="detail-item">
+                        <label>Name</label>
+                        <p>Lavesh Sewani</p>
+                    </div>
+                    <div class="detail-item">
+                        <label>Registration Number</label>
+                        <p>0827AL231065</p>
+                    </div>
+                    <div class="detail-item">
+                        <label>Email</label>
+                        <p>laveshsewani231284@acropolis.in</p>
+                    </div>
+                    <div class="detail-item">
+                        <label>GitHub Repository</label>
+                        <p><a href="https://github.com/laveshsewani/dummy" target="_blank">laveshsewani/dummy</a></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SQL Query Card -->
+            <section class="card sql-card">
+                <div class="card-header">
+                    <h2>SQL Query (Question 2 - Even Roll Digit)</h2>
+                </div>
+                <div class="code-block">
+                    <pre><code>SELECT e1.EMP_ID, e1.FIRST_NAME, e1.LAST_NAME, 
+d.DEPARTMENT_NAME, COUNT(e2.EMP_ID) AS 
+YOUNGER_EMPLOYEES_COUNT FROM EMPLOYEE e1 
+JOIN DEPARTMENT d ON e1.DEPARTMENT = d.DEPARTMENT_ID 
+LEFT JOIN EMPLOYEE e2 ON e1.DEPARTMENT = e2.DEPARTMENT 
+AND e2.DOB > e1.DOB GROUP BY e1.EMP_ID, e1.FIRST_NAME, 
+e1.LAST_NAME, d.DEPARTMENT_NAME 
+ORDER BY e1.EMP_ID DESC</code></pre>
+                </div>
+            </section>
+
+            <!-- Run Execution Card -->
+            <section class="card execution-card">
+                <div class="card-header">
+                    <h2>Live Execution API Console</h2>
+                    <button id="runBtn" class="btn-primary">
+                        <span class="btn-text">Run API Pipeline</span>
+                        <div class="loader" id="btnLoader"></div>
+                    </button>
+                </div>
+                
+                <div class="terminal" id="terminal">
+                    <div class="terminal-header">
+                        <span class="term-dot red"></span>
+                        <span class="term-dot yellow"></span>
+                        <span class="term-dot green"></span>
+                        <span class="term-title">terminal — bfhldevapigw.healthrx.co.in</span>
+                    </div>
+                    <div class="terminal-body" id="consoleLogs">
+                        <div class="log-line system">Console initialized. Ready to execute live pipeline.</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Developed with ❤️ for Bajaj Finserv Health hiring challenge.</p>
+        </footer>
+    </div>
+
+    <script>
+        const runBtn = document.getElementById('runBtn');
+        const btnLoader = document.getElementById('btnLoader');
+        const consoleLogs = document.getElementById('consoleLogs');
+
+        function appendLog(text, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            line.innerHTML = `<span class="timestamp">${new Date().toLocaleTimeString()}</span> ${text}`;
+            consoleLogs.appendChild(line);
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        }
+
+        runBtn.addEventListener('click', async () => {
+            runBtn.disabled = true;
+            btnLoader.classList.add('active');
+            appendLog('Starting live execution on Netlify Serverless Function...', 'system');
+
+            try {
+                appendLog('Calling serverless backend (/api/trigger)...', 'info');
+                const response = await fetch('/api/trigger', { method: 'POST' });
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Server returned an error');
+                }
+
+                appendLog('<b>[STEP 1] Generate Webhook</b> successful!', 'success');
+                appendLog(`Webhook URL: <span class="highlight">${result.step1.webhook}</span>`, 'info');
+                appendLog(`Access Token: <span class="token-text">${result.step1.accessToken.substring(0, 30)}...</span>`, 'info');
+
+                appendLog('<b>[STEP 2] SQL Query</b> resolved for roll number ending in 4.', 'success');
+
+                appendLog('<b>[STEP 3] Submit Webhook</b> response received.', 'success');
+                appendLog(`Status Code: <span class="highlight">${result.step3.status}</span>`, 'info');
+                appendLog(`Response: <span class="highlight-success">${JSON.stringify(result.step3.body)}</span>`, 'success');
+
+                appendLog('Pipeline finished successfully!', 'system');
+            } catch (err) {
+                appendLog(`Error: ${err.message}`, 'error');
+                appendLog('Pipeline aborted.', 'system');
+            } finally {
+                runBtn.disabled = false;
+                btnLoader.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
